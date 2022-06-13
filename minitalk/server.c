@@ -1,0 +1,102 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: qmoreau <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/29 17:47:41 by qmoreau           #+#    #+#             */
+/*   Updated: 2022/05/31 18:21:46 by qmoreau          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
+#include "Libft/libft.h"
+
+typedef struct s_struct
+{
+	int		size;
+	char	*str;
+	int		rec;
+	pid_t	pid;
+}	t_struct;
+
+static t_struct	g_gv;
+
+void	size(int in)
+{
+	static int		i = 31;
+
+	if (in == 1)
+		g_gv.size |= 1 << i;
+	i--;
+	if (g_gv.rec == 32)
+		i = 31;
+}
+
+void	handle(int code, siginfo_t *info, void *context)
+{
+	g_gv.pid = info->si_pid;
+	if (g_gv.rec < 32)
+	{
+		if (code == SIGUSR1)
+			size(1);
+		else
+			size(0);
+	}
+	if (g_gv.rec >= 32)
+	{
+		if (code == SIGUSR1)
+			g_gv.str[(g_gv.rec - 32) / 8] |= 1 << (7 - (g_gv.rec % 8));
+	}
+	g_gv.rec++;
+}
+
+int	check(int temp)
+{	
+	if (temp != g_gv.rec)
+	{
+		temp = g_gv.rec;
+		kill(g_gv.pid, SIGUSR1);
+	}
+	if (g_gv.rec == 31)
+	{
+		g_gv.str = malloc(g_gv.size + 1);
+		if (!g_gv.str)
+			return (0);
+	}
+	if (g_gv.rec >= g_gv.size * 8 + 32 && g_gv.size != 0)
+	{
+		g_gv.str[g_gv.size] = 0;
+		ft_printf("%s\n", g_gv.str);
+		g_gv.size = 0;
+		g_gv.rec = 0;
+		free(g_gv.str);
+		kill(g_gv.pid, SIGUSR2);
+		temp = 0;
+	}
+	return (1);
+}
+
+int	main(void)
+{
+	static int			temp = 0;
+	pid_t				pid;
+	struct sigaction	sa;
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_sigaction = handle;
+	sa.sa_flags = SA_SIGINFO;
+	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR2, &sa, NULL);
+	pid = getpid();
+	ft_printf("%d\n", pid);
+	while (1)
+	{
+		pause();
+		if (!check(temp))
+			return (0);
+	}
+}
