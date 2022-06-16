@@ -6,7 +6,7 @@
 /*   By: qmoreau <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/29 17:47:41 by qmoreau           #+#    #+#             */
-/*   Updated: 2022/05/31 18:21:46 by qmoreau          ###   ########.fr       */
+/*   Updated: 2022/06/16 20:47:52 by qmoreau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,38 +54,45 @@ void	handle(int code, siginfo_t *info, void *context)
 	g_gv.rec++;
 }
 
-int	check(int temp)
+int	check(int *temp)
 {	
-	if (temp != g_gv.rec)
+	//printf("temp : %d\n", *temp);
+		//printf("rec : %d\n", g_gv.rec);
+		//sleep(1);
+	if (*temp != g_gv.rec)
 	{
-		temp = g_gv.rec;
-		kill(g_gv.pid, SIGUSR1);
+		*temp = g_gv.rec;
 	}
-	if (g_gv.rec == 31)
+	if (g_gv.rec == 32)
 	{
-		g_gv.str = malloc(g_gv.size + 1);
+		g_gv.str = ft_calloc(g_gv.size + 1, 1);
+		ft_printf("bjr\n%d\n", g_gv.size);
 		if (!g_gv.str)
 			return (0);
 	}
-	if (g_gv.rec >= g_gv.size * 8 + 32 && g_gv.size != 0)
+	if (g_gv.rec >= g_gv.size * 8 + 32 && g_gv.size != 0 || g_gv.size < 0)
 	{
-		g_gv.str[g_gv.size] = 0;
+		//g_gv.str[g_gv.size] = 0;
 		ft_printf("%s\n", g_gv.str);
 		g_gv.size = 0;
 		g_gv.rec = 0;
 		free(g_gv.str);
-		kill(g_gv.pid, SIGUSR2);
-		temp = 0;
+		g_gv.str = NULL;
+		//kill(g_gv.pid, SIGUSR2);
+		*temp = 0;
 	}
+	usleep(500);
+	kill(g_gv.pid, SIGUSR1);
 	return (1);
 }
 
 int	main(void)
 {
-	static int			temp = 0;
+	int					temp;
 	pid_t				pid;
 	struct sigaction	sa;
 
+	temp = 0;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_sigaction = handle;
 	sa.sa_flags = SA_SIGINFO;
@@ -96,7 +103,7 @@ int	main(void)
 	while (1)
 	{
 		pause();
-		if (!check(temp))
+		if (!check(&temp))
 			return (0);
 	}
 }

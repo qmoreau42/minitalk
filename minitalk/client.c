@@ -6,7 +6,7 @@
 /*   By: qmoreau <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/29 17:47:50 by qmoreau           #+#    #+#             */
-/*   Updated: 2022/05/06 13:22:06 by qmoreau          ###   ########.fr       */
+/*   Updated: 2022/06/16 20:51:10 by qmoreau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ void	siz(int pid, size_t size)
 			kill(pid, SIGUSR2);
 		j--;
 		t = usleep(50000);
-		if (t == 0)
-			return ;
+		//if (t == 0)
+		//	return ;
 	}
 }
 
@@ -60,7 +60,7 @@ void	bin(char *str, int pid)
 			else
 				kill(pid, SIGUSR2);
 			t = usleep(50000);
-			if (t == 0)
+			if (t == 0 && i != 0 && j != 7)
 				return ;
 			j--;
 		}

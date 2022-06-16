@@ -6,11 +6,11 @@
 #    By: qmoreau <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/03/29 17:48:15 by qmoreau           #+#    #+#              #
-#    Updated: 2022/04/04 19:14:29 by qmoreau          ###   ########.fr        #
+#    Updated: 2022/06/16 19:30:48 by qmoreau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-CC = gcc
+CC = gcc -g
 
 NAME1 = server
 
@@ -27,6 +27,10 @@ OBJS1 = $(SRCS1:.c=.o)
 OBJS2 = $(SRCS2:.c=.o)
 
 all : $(NAME1) $(NAME2)
+
+run:
+	make
+	server
 
 $(NAME1) : $(OBJS1)
 			cd Libft && $(MAKE) bonus
